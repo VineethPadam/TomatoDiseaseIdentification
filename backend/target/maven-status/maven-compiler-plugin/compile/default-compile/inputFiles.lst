@@ -1,0 +1,16 @@
+C:\Users\kovvu\OneDrive\Desktop\Tomato_disease_identification_project_folder\project\TomatoDiseaseIdentification\backend\src\main\java\com\agri\tomatodisease\controller\DiseaseCatalogController.java
+C:\Users\kovvu\OneDrive\Desktop\Tomato_disease_identification_project_folder\project\TomatoDiseaseIdentification\backend\src\main\java\com\agri\tomatodisease\service\SpringAiReportService.java
+C:\Users\kovvu\OneDrive\Desktop\Tomato_disease_identification_project_folder\project\TomatoDiseaseIdentification\backend\src\main\java\com\agri\tomatodisease\TomatoDiseaseApplication.java
+C:\Users\kovvu\OneDrive\Desktop\Tomato_disease_identification_project_folder\project\TomatoDiseaseIdentification\backend\src\main\java\com\agri\tomatodisease\config\CorsConfig.java
+C:\Users\kovvu\OneDrive\Desktop\Tomato_disease_identification_project_folder\project\TomatoDiseaseIdentification\backend\src\main\java\com\agri\tomatodisease\model\DiagnosisRecord.java
+C:\Users\kovvu\OneDrive\Desktop\Tomato_disease_identification_project_folder\project\TomatoDiseaseIdentification\backend\src\main\java\com\agri\tomatodisease\repository\DiseaseEntityRepository.java
+C:\Users\kovvu\OneDrive\Desktop\Tomato_disease_identification_project_folder\project\TomatoDiseaseIdentification\backend\src\main\java\com\agri\tomatodisease\model\WeatherIndicators.java
+C:\Users\kovvu\OneDrive\Desktop\Tomato_disease_identification_project_folder\project\TomatoDiseaseIdentification\backend\src\main\java\com\agri\tomatodisease\service\AgEra5RiskService.java
+C:\Users\kovvu\OneDrive\Desktop\Tomato_disease_identification_project_folder\project\TomatoDiseaseIdentification\backend\src\main\java\com\agri\tomatodisease\config\AppConfig.java
+C:\Users\kovvu\OneDrive\Desktop\Tomato_disease_identification_project_folder\project\TomatoDiseaseIdentification\backend\src\main\java\com\agri\tomatodisease\controller\AiAssistantController.java
+C:\Users\kovvu\OneDrive\Desktop\Tomato_disease_identification_project_folder\project\TomatoDiseaseIdentification\backend\src\main\java\com\agri\tomatodisease\model\DiseaseEntity.java
+C:\Users\kovvu\OneDrive\Desktop\Tomato_disease_identification_project_folder\project\TomatoDiseaseIdentification\backend\src\main\java\com\agri\tomatodisease\repository\DiagnosisRecordRepository.java
+C:\Users\kovvu\OneDrive\Desktop\Tomato_disease_identification_project_folder\project\TomatoDiseaseIdentification\backend\src\main\java\com\agri\tomatodisease\service\MlInferenceService.java
+C:\Users\kovvu\OneDrive\Desktop\Tomato_disease_identification_project_folder\project\TomatoDiseaseIdentification\backend\src\main\java\com\agri\tomatodisease\service\DiseaseCatalogService.java
+C:\Users\kovvu\OneDrive\Desktop\Tomato_disease_identification_project_folder\project\TomatoDiseaseIdentification\backend\src\main\java\com\agri\tomatodisease\model\DiagnosisResponse.java
+C:\Users\kovvu\OneDrive\Desktop\Tomato_disease_identification_project_folder\project\TomatoDiseaseIdentification\backend\src\main\java\com\agri\tomatodisease\controller\DiagnosisController.java

@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroVision AI — Tomato Leaf Health & Disease Diagnostic System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Minimalist Navbar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="brand">
+                <span class="brand-logo">🌿</span>
+                <span class="brand-name">AgroVision <span class="brand-ai">AI</span></span>
+            </div>
+
+            <nav class="nav-links">
+                <button class="nav-link active" data-tab="tab-diagnose">Diagnose Leaf</button>
+                <button class="nav-link" data-tab="tab-history">History (<span id="historyBadge">0</span>)</button>
+                <button class="nav-link" data-tab="tab-guide">Disease Library</button>
+                <button class="nav-link" data-tab="tab-about">Project Specs</button>
+            </nav>
+
+            <div class="status-badge" title="LeafVision-DINO (ViT-S/16) Online">
+                <span class="status-dot"></span> System Ready
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Page Container -->
+    <main class="page-container">
+
+        <!-- TAB 1: DIAGNOSE LEAF -->
+        <section id="tab-diagnose" class="tab-content active">
+            
+            <div class="hero-section">
+                <h1>Tomato Leaf Disease Identification & AI Report</h1>
+                <p>Upload a tomato leaf photo to diagnose diseases with 98% accuracy, view thermal heatmap visualization of infected areas, and download a complete agronomy report.</p>
+            </div>
+
+            <!-- Unified Diagnostic Card (Upload + Weather in one clear view) -->
+            <div class="main-card">
+                
+                <!-- TOP: Leaf Image Selection -->
+                <div class="section-block">
+                    <div class="block-header">
+                        <span class="step-num">1</span>
+                        <h2>Select or Upload Tomato Leaf Photo</h2>
+                        <span class="header-note">Accepts green, yellow chlorotic, and spotted tomato leaves</span>
+                    </div>
+
+                    <div class="drop-zone" id="dropzone">
+                        <input type="file" id="leafInput" accept="image/png, image/jpeg, image/jpg, image/webp" hidden>
+                        
+                        <div class="drop-prompt" id="dropPrompt">
+                            <div class="upload-icon">
+                                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                            </div>
+                            <h3>Drag & drop your leaf photo here</h3>
+                            <p>or <button type="button" class="btn-browse" id="browseBtn">Browse from device</button></p>
+                            <span class="upload-hint">JPG, PNG, WEBP (Supports both healthy and yellow/diseased leaves)</span>
+                        </div>
+
+                        <!-- Image Preview -->
+                        <div class="preview-box" id="previewBox" style="display: none;">
+                            <img id="leafPreview" alt="Uploaded Tomato Leaf">
+                            <div class="preview-bar">
+                                <span id="previewName" class="preview-name">leaf.jpg</span>
+                                <button type="button" class="btn-change-img" id="removeImgBtn">✕ Remove / Change</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Benchmark Samples -->
+                    <div class="samples-row">
+                        <span class="samples-title">⚡ Quick Test Leaves:</span>
+                        <div class="samples-list">
+                            <button type="button" class="sample-btn" data-sample="early_blight_leaf.jpg" data-preset="warm_humid_summer">
+                                Early Blight
+                            </button>
+                            <button type="button" class="sample-btn" data-sample="late_blight_leaf.jpg" data-preset="monsoon_high_humidity">
+                                Late Blight
+                            </button>
+                            <button type="button" class="sample-btn" data-sample="bacterial_spot_leaf.jpg" data-preset="monsoon_high_humidity">
+                                Bacterial Spot
+                            </button>
+                            <button type="button" class="sample-btn" data-sample="yellow_leaf_curl_leaf.jpg" data-preset="hot_arid_drought">
+                                Yellow Leaf (TYLCV)
+                            </button>
+                            <button type="button" class="sample-btn" data-sample="septoria_spot_leaf.jpg" data-preset="warm_humid_summer">
+                                Septoria Spot
+                            </button>
+                            <button type="button" class="sample-btn" data-sample="healthy_leaf.jpg" data-preset="optimal_greenhouse">
+                                Healthy Leaf
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTTOM: Weather Parameters (Always visible while selecting picture!) -->
+                <div class="section-block">
+                    <div class="block-header">
+                        <span class="step-num">2</span>
+                        <h2>Field Weather Conditions (Copernicus AgERA5 v2.0)</h2>
+                        <span class="header-note">Adjust climate conditions below while selecting your photo</span>
+                    </div>
+
+                    <!-- Quick Weather Presets -->
+                    <div class="weather-presets-bar">
+                        <span class="presets-title">Macro Climate:</span>
+                        <div class="preset-buttons">
+                            <button type="button" class="preset-pill active" data-preset="monsoon_high_humidity">
+                                🌧️ Rainy & Humid (22°C, 92%)
+                            </button>
+                            <button type="button" class="preset-pill" data-preset="warm_humid_summer">
+                                ☀️ Warm & Dewy (27°C, 84%)
+                            </button>
+                            <button type="button" class="preset-pill" data-preset="hot_arid_drought">
+                                🏜️ Hot & Dry (34°C, 36%)
+                            </button>
+                            <button type="button" class="preset-pill" data-preset="optimal_greenhouse">
+                                🏡 Controlled Greenhouse (24°C, 65%)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Direct Sliders (Always Visible & Interactive) -->
+                    <div class="weather-controls-grid">
+                        <!-- Temperature -->
+                        <div class="control-card">
+                            <div class="control-header">
+                                <span class="control-name">🌡️ Air Temperature</span>
+                                <span class="control-value" id="tempDisplay">22.0 °C</span>
+                            </div>
+                            <input type="range" id="tempInput" min="12" max="42" step="0.5" value="22.0" class="live-slider">
+                            <div class="quick-ticks">
+                                <button type="button" class="tick-btn" data-val="18">18°C (Cool)</button>
+                                <button type="button" class="tick-btn" data-val="24">24°C (Mild)</button>
+                                <button type="button" class="tick-btn" data-val="30">30°C (Warm)</button>
+                                <button type="button" class="tick-btn" data-val="36">36°C (Hot)</button>
+                            </div>
+                        </div>
+
+                        <!-- Relative Humidity -->
+                        <div class="control-card">
+                            <div class="control-header">
+                                <span class="control-name">💧 Relative Humidity</span>
+                                <span class="control-value" id="humidityDisplay">92 %</span>
+                            </div>
+                            <input type="range" id="humidityInput" min="20" max="100" step="1" value="92" class="live-slider">
+                            <div class="quick-ticks">
+                                <button type="button" class="tick-btn" data-val="40">40% (Dry)</button>
+                                <button type="button" class="tick-btn" data-val="65">65% (Normal)</button>
+                                <button type="button" class="tick-btn" data-val="85">85% (High)</button>
+                                <button type="button" class="tick-btn" data-val="95">95% (Extreme)</button>
+                            </div>
+                        </div>
+
+                        <!-- Live VPD Indicator -->
+                        <div class="control-card vpd-span-card">
+                            <div class="control-header">
+                                <span class="control-name">🍃 Vapour Pressure Deficit (VPD)</span>
+                                <span class="control-value vpd-highlight" id="vpdDisplay">0.28 kPa</span>
+                            </div>
+                            <div class="vpd-bar-track">
+                                <div class="vpd-bar-fill" id="vpdBar" style="width: 20%;"></div>
+                            </div>
+                            <span class="control-note" id="vpdNote">Atmospheric moisture conditions: High Fungal & Bacterial Spore Risk</span>
+                            <input type="range" id="precipInput" min="0" max="50" step="0.5" value="18.5" hidden>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Primary Action Button -->
+                <div class="action-submit-wrap">
+                    <button type="button" class="btn-diagnose" id="runDiagnosisBtn">
+                        <span class="btn-icon">⚡</span> Run LeafVision-DINO Diagnosis & Highlight Heatmap
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Loading Spinner -->
+            <div class="loading-panel" id="loadingState" style="display: none;">
+                <div class="spinner"></div>
+                <h3>Running LeafVision-DINO ViT-S/16 Model...</h3>
+                <p>Generating diseased region attention heatmap and synthesizing Spring AI agronomy report...</p>
+            </div>
+
+            <!-- Error Banner (For Invalid Human Photos or Non-Leaves) -->
+            <div class="error-banner" id="errorBanner" style="display: none;">
+                <div class="error-icon">⚠️</div>
+                <div class="error-text">
+                    <h3 id="errorTitle">Invalid Image Detected</h3>
+                    <p id="errorMsg">Please upload a clear close-up photo of a tomato leaf.</p>
+                </div>
+                <button type="button" class="btn-dismiss" id="dismissErrorBtn">✕</button>
+            </div>
+
+            <!-- DIAGNOSIS RESULTS & HEATMAP SECTION -->
+            <div class="result-section" id="reportContainer" style="display: none;">
+                
+                <!-- Result Hero Banner -->
+                <div class="result-hero-card">
+                    <div class="hero-text-side">
+                        <div class="badge-row">
+                            <span class="pill-badge category-pill" id="resCategory">Fungal Disease</span>
+                            <span class="pill-badge risk-pill" id="resRiskLevel">High Weather Risk</span>
+                        </div>
+                        <h2 class="disease-title" id="resDiseaseName">Early Blight</h2>
+                        <p class="sci-name" id="resScientificName">Alternaria solani</p>
+                    </div>
+
+                    <div class="accuracy-badge-box">
+                        <div class="accuracy-dial">
+                            <span class="accuracy-number" id="confidenceValue">98.4%</span>
+                            <span class="accuracy-sub">Confidence</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GRAD-CAM VISUAL PATHOLOGY & DISEASE HEATMAP (MATCHING ACADEMIC SPECIFICATION) -->
+                <div class="heatmap-comparison-card">
+                    <div class="comparison-header">
+                        <div>
+                            <h3>🔬 Visual Pathology & LeafVision Grad-CAM Heatmap</h3>
+                            <p>Direct attention visualization highlighting water-soaked margins, chlorosis, and necrotic lesion focus.</p>
+                        </div>
+                        <div class="heatmap-controls-row">
+                            <div class="view-mode-tabs">
+                                <button type="button" class="btn-mode-tab active" id="modeSideBySideBtn">↔️ Side-by-Side View</button>
+                                <button type="button" class="btn-mode-tab" id="modeOverlayBtn">🔥 Heatmap In Leaf Image</button>
+                                <button type="button" class="btn-mode-tab" id="modeOriginalBtn">📷 Original Leaf Only</button>
+                            </div>
+                            <div class="heatmap-legend">
+                                <span class="legend-item"><span class="legend-dot red"></span> 🔴 Diseased Part (Hot Red)</span>
+                                <span class="legend-item"><span class="legend-dot green"></span> 🟢 Un-diseased Part (Foliage Green)</span>
+                                <span class="legend-item"><span class="legend-dot dark"></span> ⬛ Non-Leaf Background</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 1. Side-by-Side Display (Matching Paper: (a) Detected Leaf Photo, (b) Grad-CAM Heatmap) -->
+                    <div class="comparison-images-row" id="sideBySideContainer">
+                        <div class="image-box">
+                            <div class="image-box-header">
+                                <span class="badge-letter">(a)</span>
+                                <span class="image-box-title">[Detected Leaf Photo]</span>
+                            </div>
+                            <div class="img-frame">
+                                <img id="resOriginalImg" alt="Detected Leaf Photo">
+                            </div>
+                        </div>
+
+                        <div class="image-box">
+                            <div class="image-box-header">
+                                <span class="badge-letter">(b)</span>
+                                <span class="image-box-title" id="resCamTitle">Late Blight Grad-CAM</span>
+                                <span class="cam-focus-tag" id="resCamFocus">[Water-soaked lesion margins]</span>
+                            </div>
+                            <div class="img-frame heatmap-frame">
+                                <img id="resHeatmapImg" alt="Disease Grad-CAM Heatmap">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Single Layered In-Image Overlay View with Opacity Slider -->
+                    <div class="single-overlay-container" id="singleOverlayContainer" style="display: none;">
+                        <div class="overlay-interactive-frame">
+                            <img id="overlayBaseImg" class="overlay-base-img" alt="Underlying Leaf">
+                            <img id="overlayHeatImg" class="overlay-heat-img" alt="Grad-CAM Overlay">
+                        </div>
+                        <div class="opacity-slider-bar">
+                            <label for="heatOpacityRange">🔥 Heatmap Blend Opacity: <span id="opacityLabel">85%</span></label>
+                            <input type="range" id="heatOpacityRange" min="0" max="100" value="85" class="opacity-slider">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MATPLOTLIB ANALYTICS & ENVIRONMENTAL TELEMETRY -->
+                <div class="analytics-chart-card">
+                    <div class="analytics-header">
+                        <div class="analytics-title-group">
+                            <span class="card-glyph">📊</span>
+                            <div>
+                                <h3>Diagnostic Data Analytics & AgERA5 Microclimate Breakdown</h3>
+                                <p>Generated via Matplotlib: ViT-S/16 classification confidence, microclimatic telemetry, and foliar infection ratio.</p>
+                            </div>
+                        </div>
+                        <span class="mpl-badge">Python Matplotlib 3.11</span>
+                    </div>
+                    <div class="chart-img-frame">
+                        <img id="resAnalyticsChartImg" alt="Diagnostic Data Analytics Chart (Matplotlib)" class="analytics-chart-img">
+                    </div>
+                </div>
+
+                <!-- IN-SITU COPERNICUS AGERA5 MICROCLIMATE TELEMETRY -->
+                <div class="telemetry-grid-card">
+                    <div class="telemetry-grid-card-header">
+                        <span class="card-glyph">🌦️</span>
+                        <h3>Copernicus AgERA5 In-Situ Leaf Microclimate Telemetry</h3>
+                    </div>
+                    <div class="microclimate-metrics-row">
+                        <div class="microclimate-metric-box">
+                            <div class="metric-box-label">Temperature</div>
+                            <div class="metric-box-val" id="resTemp">24.5 °C</div>
+                            <div class="metric-box-sub">Thermal Risk Zone</div>
+                        </div>
+                        <div class="microclimate-metric-box">
+                            <div class="metric-box-label">Rel. Humidity</div>
+                            <div class="metric-box-val" id="resHum">88 %</div>
+                            <div class="metric-box-sub">Spore Germination</div>
+                        </div>
+                        <div class="microclimate-metric-box">
+                            <div class="metric-box-label">Vapour Pressure (VPD)</div>
+                            <div class="metric-box-val" id="resVpd">0.45 kPa</div>
+                            <div class="metric-box-sub">Transpiration Stress</div>
+                        </div>
+                        <div class="microclimate-metric-box">
+                            <div class="metric-box-label">Precipitation</div>
+                            <div class="metric-box-val" id="resPrecip">4.2 mm</div>
+                            <div class="metric-box-sub">Splash Dispersal</div>
+                        </div>
+                        <div class="microclimate-metric-box">
+                            <div class="metric-box-label">Solar Radiation</div>
+                            <div class="metric-box-val" id="resSolar">17.8 MJ</div>
+                            <div class="metric-box-sub">Canopy Penetration</div>
+                        </div>
+                        <div class="microclimate-metric-box">
+                            <div class="metric-box-label">Outbreak Risk</div>
+                            <div class="metric-box-val" id="resRiskBadge" style="color: #ef4444;">High Alert</div>
+                            <div class="metric-box-sub" id="resRiskScore">Score: 84%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STRUCTURED SPRING AI REPORT -->
+                <div class="report-cards-stack">
+                    
+                    <!-- 1. Symptoms & Summary -->
+                    <div class="report-card">
+                        <div class="report-card-header">
+                            <span class="card-glyph">📋</span>
+                            <h3>1. Observed Symptoms & Visual Pathology</h3>
+                        </div>
+                        <p class="report-body" id="repSummaryText"></p>
+                        <div class="symptoms-bullet-list" id="repSymptomsText"></div>
+                    </div>
+
+                    <!-- 2. Climatic & Pathological Causes -->
+                    <div class="report-card">
+                        <div class="report-card-header">
+                            <span class="card-glyph">🌦️</span>
+                            <h3>2. Underlying Pathological & AgERA5 Climatic Reasons</h3>
+                        </div>
+                        <p class="report-body" id="repReasonsText"></p>
+                    </div>
+
+                    <!-- 3. Treatment Grid: Organic vs Chemical -->
+                    <div class="treatment-split-grid">
+                        <div class="report-card organic-accent">
+                            <div class="report-card-header">
+                                <span class="card-glyph">🌱</span>
+                                <h3>3. Biological & Organic Remedies</h3>
+                            </div>
+                            <div class="treatment-text" id="repOrganicsText"></div>
+                        </div>
+
+                        <div class="report-card chemical-accent">
+                            <div class="report-card-header">
+                                <span class="card-glyph">🧪</span>
+                                <h3>4. Chemical Fungicides & Dosage Protocols</h3>
+                            </div>
+                            <div class="treatment-text" id="repChemicalsText"></div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Long-Term Prevention -->
+                    <div class="report-card">
+                        <div class="report-card-header">
+                            <span class="card-glyph">🛡️</span>
+                            <h3>5. Long-Term Preventive Agronomic Strategies</h3>
+                        </div>
+                        <div class="treatment-text" id="repPreventionsText"></div>
+                    </div>
+
+                </div>
+
+                <!-- Action Download Toolbar -->
+                <div class="report-download-bar">
+                    <button type="button" class="btn-download-pdf" id="downloadPdfBtn">
+                        📥 Download Official PDF Report (with Photos & Heatmap)
+                    </button>
+                    <button type="button" class="btn-download-txt" id="downloadTxtBtn">
+                        📄 Download Summary (.txt)
+                    </button>
+                    <button type="button" class="btn-action-chat" id="openChatBtn">
+                        💬 Ask AI Agronomist
+                    </button>
+                    <button type="button" class="btn-action-again" id="scanAgainBtn">
+                        🔄 Scan Another Leaf
+                    </button>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- TAB 2: HISTORY (SAVED IN MYSQL) -->
+        <section id="tab-history" class="tab-content">
+            <div class="clean-panel">
+                <div class="panel-header-row">
+                    <div>
+                        <h2>MySQL Scan History</h2>
+                        <p>All previously analyzed tomato leaves saved in your MySQL database.</p>
+                    </div>
+                    <button type="button" class="btn-action-outline" id="refreshHistoryBtn">🔄 Refresh</button>
+                </div>
+
+                <div class="table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Scan ID</th>
+                                <th>Date</th>
+                                <th>Leaf Photo</th>
+                                <th>Disease Name</th>
+                                <th>Accuracy</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr><td colspan="6" class="table-empty">Loading MySQL records...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: DISEASE LIBRARY (PLANTVILLAGE CLASSES) -->
+        <section id="tab-guide" class="tab-content">
+            <div class="clean-panel">
+                <div class="panel-header-row">
+                    <div>
+                        <h2>Tomato Disease Reference Library</h2>
+                        <p>All 10 PlantVillage tomato classes with biological pathogens and symptoms.</p>
+                    </div>
+                    <input type="text" id="diseaseSearchInput" placeholder="Filter diseases..." class="search-input">
+                </div>
+
+                <div class="guide-cards-grid" id="encyclopediaGrid">
+                    <!-- Populated via API -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: PROJECT SPECS (FOR VIVA DEFENSE) -->
+        <section id="tab-about" class="tab-content">
+            <div class="clean-panel">
+                <h2>Technical & Architectural Specifications</h2>
+                <p class="panel-subtitle">Final Year Project Reference for Technical Review, Viva Examination, and Defense.</p>
+
+                <div class="specs-grid">
+                    <div class="spec-box">
+                        <h3>1. Model: LeafVision-DINO (ViT-S/16)</h3>
+                        <p>Vision Transformer Small with $16 \times 16$ patch resolution, 196 spatial tokens, 12 encoder blocks, and 384 embedding dimensions. Uses self-supervised DINO feature representations to segment lesions, necrotic spots, and chlorosis without requiring manual bounding box labels.</p>
+                    </div>
+                    <div class="spec-box">
+                        <h3>2. AgERA5 v2.0 Microclimate Conditioning</h3>
+                        <p>Fuses 6 Copernicus AgERA5 daily surface indicators (2m Temperature, Relative Humidity, Precipitation Flux, Solar Radiation, 10m Wind Speed, and Tetens-derived Vapour Pressure Deficit) via Gated Multimodal Units (GMU) to correlate pathogen sporulation thresholds with visual pathology.</p>
+                    </div>
+                    <div class="spec-box">
+                        <h3>3. Spring AI Report Generation</h3>
+                        <p>Translates model logits and environmental parameters into structured agronomic reports detailing accuracy, symptoms, climatic triggers, and exact organic/chemical treatment dosages.</p>
+                    </div>
+                    <div class="spec-box">
+                        <h3>4. Spring Boot 3 & MySQL 9.4 Backend</h3>
+                        <p>Enterprise microservice stack built with Java 21 LTS, Spring Data JPA, Hibernate ORM, and dual profile support (MySQL production + H2 test mode) for 100% demo uptime.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- PRINTABLE REPORT / PDF TEMPLATE MODAL -->
+    <div class="report-modal-backdrop" id="printModal" style="display: none;">
+        <div class="official-report-document" id="printableCertificate">
+            
+            <!-- Document Header -->
+            <div class="doc-header">
+                <div class="doc-header-brand">
+                    <span class="doc-logo">🌿</span>
+                    <div>
+                        <h2>AGROVISION AI — OFFICIAL PHYTOSANITARY DIAGNOSTIC REPORT</h2>
+                        <p>Tomato Crop Health & Agrometeorological Pathology Assessment</p>
+                    </div>
+                </div>
+                <div class="doc-meta-box">
+                    <div><strong>Report ID:</strong> <span id="docScanId">#1024</span></div>
+                    <div><strong>Date:</strong> <span id="docDate">2026-10-23</span></div>
+                    <div><strong>Status:</strong> <span class="doc-status-badge">VERIFIED</span></div>
+                </div>
+            </div>
+
+            <hr class="doc-divider">
+
+            <!-- Primary Disease Banner -->
+            <div class="doc-diagnosis-banner">
+                <div>
+                    <h1 id="docDiseaseName">Early Blight</h1>
+                    <p class="doc-sci" id="docSciName">Alternaria solani</p>
+                </div>
+                <div class="doc-accuracy-stamp">
+                    <span class="stamp-acc" id="docConfidence">98.4%</span>
+                    <span class="stamp-lbl">ViT-S/16 Accuracy</span>
+                </div>
+            </div>
+
+            <!-- Both Images Embedded in Printable Document -->
+            <div class="doc-images-container">
+                <div class="doc-img-card">
+                    <h4>(a) [Detected Leaf Photo]</h4>
+                    <img id="docOriginalImg" alt="Original Leaf">
+                </div>
+                <div class="doc-img-card">
+                    <h4>(b) <span id="docCamTitle">Grad-CAM Heatmap</span> <span class="doc-cam-focus" id="docCamFocus">[Active Lesion Focus]</span></h4>
+                    <img id="docHeatmapImg" alt="Grad-CAM Disease Heatmap">
+                </div>
+            </div>
+
+            <!-- Matplotlib Diagnostic Graphic Embedded in Printable Document -->
+            <div class="doc-chart-container">
+                <h4>(c) Multimodal Diagnostic Analytics (Matplotlib ViT-S/16 Confidence, AgERA5 Telemetry & Foliar Infection Ratio)</h4>
+                <img id="docAnalyticsChartImg" alt="Matplotlib Diagnostic Graphic">
+            </div>
+
+            <!-- Weather Conditions -->
+            <div class="doc-weather-strip">
+                <div><strong>Temperature:</strong> <span id="docTemp">22.0 °C</span></div>
+                <div><strong>Humidity:</strong> <span id="docHum">92 %</span></div>
+                <div><strong>VPD:</strong> <span id="docVpd">0.28 kPa</span></div>
+                <div><strong>Precipitation:</strong> <span id="docPrecip">4.2 mm</span></div>
+                <div><strong>Solar Radiation:</strong> <span id="docSolar">17.5 MJ</span></div>
+                <div><strong>Microclimate Alert:</strong> <span id="docRisk">High Outbreak Risk</span></div>
+            </div>
+
+            <!-- Report Sections -->
+            <div class="doc-section">
+                <h3>1. Visual Botanical Symptoms</h3>
+                <div id="docSymptomsText"></div>
+            </div>
+
+            <div class="doc-section">
+                <h3>2. Pathological & AgERA5 Climatic Reasons</h3>
+                <p id="docReasonsText"></p>
+            </div>
+
+            <div class="doc-section">
+                <h3>3. Organic & Natural Treatments</h3>
+                <div id="docOrganicsText"></div>
+            </div>
+
+            <div class="doc-section">
+                <h3>4. Recommended Chemical Fungicides & Application Dosages</h3>
+                <div id="docChemicalsText"></div>
+            </div>
+
+            <div class="doc-section">
+                <h3>5. Long-term Preventive Agronomic Strategies</h3>
+                <div id="docPreventionsText"></div>
+            </div>
+
+            <!-- Document Footer -->
+            <div class="doc-footer">
+                <p>Generated automatically via LeafVision-DINO (ViT-S/16), Copernicus AgERA5 v2.0, and Spring AI Diagnostic Engine.</p>
+                <div class="doc-actions-no-print">
+                    <button type="button" class="btn-direct-pdf" id="directDownloadPdfBtn">📥 Save PDF File Directly</button>
+                    <button type="button" class="btn-print-now" id="printViaBrowserBtn">🖨️ Print / Save via Browser</button>
+                    <button type="button" class="btn-close-doc" id="closePrintBtn">✕ Close Preview</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Interactive Chat Modal -->
+    <div class="chat-modal-backdrop" id="chatOverlay" style="display: none;">
+        <div class="chat-modal">
+            <div class="chat-modal-header">
+                <div class="chat-title">
+                    <span>🌱</span>
+                    <strong>Spring AI Agronomist</strong>
+                </div>
+                <button type="button" class="btn-close-modal" id="closeChatBtn">✕</button>
+            </div>
+            <div class="chat-messages" id="chatBody">
+                <div class="chat-bubble ai">
+                    Hello! Ask me any question about your tomato diagnosis, recommended fungicide doses, or organic pest solutions.
+                </div>
+            </div>
+            <form id="chatForm" class="chat-input-box">
+                <input type="text" id="chatInput" placeholder="Ask a question (e.g. Can I use copper spray?)..." required>
+                <button type="submit" class="btn-chat-send">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="js/weather.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
