@@ -110,13 +110,18 @@ def normalize_agera5_vector(indicators: Dict[str, float]) -> list:
     return [t, rh, pr, sr, w, v]
 
 
-def assess_epidemiological_risk(disease_class: str, weather: Dict[str, float]) -> Dict[str, Any]:
+def assess_epidemiological_risk(
+    disease_class: str,
+    weather: Dict[str, float],
+    foliar_pct: float = 0.0
+) -> Dict[str, Any]:
     """
-    Evaluates microclimatic risk for the given disease under current AgERA5 indicators.
+    Evaluates microclimatic and physical foliar risk for the given disease under current AgERA5 indicators.
+    Integrates physical leaf foliar lesion severity (60%) with ambient microclimatic disease pressure (40%).
     Returns:
-      - risk_level: "Low", "Moderate", "High", "Critical"
-      - risk_score: float (0.0 to 100.0)
-      - risk_reasons: list of explanatory microclimatic triggers
+      - risk_level: "Low Risk / Optimal Health", "Low Microclimatic Stress", "Moderate Alert / Active Spread", "High Risk / Critical Outbreak"
+      - risk_score: float (10.0 to 99.0)
+      - risk_reasons: list of explanatory leaf pathological and microclimatic triggers
     """
     temp = weather.get("temperature", 24.0)
     rh = weather.get("humidity", 70.0)
@@ -213,21 +218,48 @@ def assess_epidemiological_risk(disease_class: str, weather: Dict[str, float]) -
             reasons.append("Absence of heavy rain allows airborne whitefly populations to fly freely and transmit TYLCV.")
 
     elif disease_class == "Tomato___healthy":
-        # Optimal vegetative growth conditions
+        # Plant is healthy: zero pathogen outbreak risk
+        score = 10.0
         if 20.0 <= temp <= 26.0 and 55.0 <= rh <= 75.0 and 0.8 <= vpd <= 1.4:
-            score = 90.0
-            reasons.append(f"Current AgERA5 parameters (Temp: {temp:.1f}°C, RH: {rh:.1f}%, VPD: {vpd:.2f} kPa) sit directly inside the optimal tomato physiological comfort zone.")
+            reasons.append(f"Optimal vegetative climate: Temp ({temp:.1f}°C), RH ({rh:.1f}%), and VPD ({vpd:.2f} kPa) support vigorous, disease-free tomato foliage.")
         else:
-            score = 65.0
-            reasons.append("Environmental parameters present minor physiological stress but remain manageable with good cultivation.")
+            reasons.append("Foliage is healthy. Ambient microclimate requires routine agronomic monitoring but presents minimal pathogen risk.")
+        level = "Low Risk / Optimal Health"
+        return {
+            "disease": disease_class,
+            "risk_score": round(score, 1),
+            "risk_level": level,
+            "vpd_kpa": round(vpd, 2),
+            "microclimate_factors": reasons
+        }
 
-    # Clamp score between 5.0 and 99.0
-    score = min(99.0, max(5.0, score))
+    # Realistic Plant-Grounding: Blend physical foliar infection severity (60%) with microclimate score (40%)
+    foliar_val = max(0.0, float(foliar_pct))
+    if foliar_val >= 50.0:
+        foliar_severity = 75.0 + min(25.0, (foliar_val - 50.0) * 0.5)
+        severity_desc = f"Critical foliar infection: {foliar_val:.1f}% of leaf tissue is destroyed by active pathological lesions."
+    elif foliar_val >= 20.0:
+        foliar_severity = 50.0 + (foliar_val - 20.0) * 0.83
+        severity_desc = f"Substantial foliar spread: {foliar_val:.1f}% of leaf area exhibits pathological damage."
+    elif foliar_val > 0.0:
+        foliar_severity = 30.0 + foliar_val * 1.0
+        severity_desc = f"Early localized foliar damage: {foliar_val:.1f}% symptomatic leaf area detected."
+    else:
+        foliar_severity = score
 
-    if score >= 75.0:
-        level = "High Risk / Outbreak Conditions"
-    elif score >= 50.0:
-        level = "Moderate Alert"
+    if foliar_val > 0.0:
+        final_score = 0.60 * foliar_severity + 0.40 * score
+        reasons.insert(0, severity_desc)
+    else:
+        final_score = score
+
+    # Clamp score between 10.0 and 99.0
+    final_score = min(99.0, max(10.0, final_score))
+
+    if final_score >= 70.0:
+        level = "High Risk / Critical Outbreak"
+    elif final_score >= 45.0:
+        level = "Moderate Alert / Active Spread"
     else:
         level = "Low Microclimatic Stress"
 
@@ -236,8 +268,9 @@ def assess_epidemiological_risk(disease_class: str, weather: Dict[str, float]) -
 
     return {
         "disease": disease_class,
-        "risk_score": round(score, 1),
+        "risk_score": round(final_score, 1),
         "risk_level": level,
         "vpd_kpa": round(vpd, 2),
+        "foliar_infection_pct": round(foliar_val, 1),
         "microclimate_factors": reasons
     }

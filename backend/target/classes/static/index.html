@@ -118,8 +118,8 @@
                     <div class="weather-presets-bar">
                         <span class="presets-title">Macro Climate:</span>
                         <div class="preset-buttons">
-                            <button type="button" class="preset-pill active" data-preset="monsoon_high_humidity">
-                                🌧️ Rainy & Humid (22°C, 92%)
+                            <button type="button" class="preset-pill active" data-preset="optimal_greenhouse">
+                                🏡 Controlled Greenhouse (24°C, 65%)
                             </button>
                             <button type="button" class="preset-pill" data-preset="warm_humid_summer">
                                 ☀️ Warm & Dewy (27°C, 84%)
@@ -127,8 +127,8 @@
                             <button type="button" class="preset-pill" data-preset="hot_arid_drought">
                                 🏜️ Hot & Dry (34°C, 36%)
                             </button>
-                            <button type="button" class="preset-pill" data-preset="optimal_greenhouse">
-                                🏡 Controlled Greenhouse (24°C, 65%)
+                            <button type="button" class="preset-pill" data-preset="monsoon_high_humidity">
+                                🌧️ Rainy & Humid (22°C, 92%)
                             </button>
                         </div>
                     </div>
@@ -139,9 +139,9 @@
                         <div class="control-card">
                             <div class="control-header">
                                 <span class="control-name">🌡️ Air Temperature</span>
-                                <span class="control-value" id="tempDisplay">22.0 °C</span>
+                                <span class="control-value" id="tempDisplay">24.0 °C</span>
                             </div>
-                            <input type="range" id="tempInput" min="12" max="42" step="0.5" value="22.0" class="live-slider">
+                            <input type="range" id="tempInput" min="12" max="42" step="0.5" value="24.0" class="live-slider">
                             <div class="quick-ticks">
                                 <button type="button" class="tick-btn" data-val="18">18°C (Cool)</button>
                                 <button type="button" class="tick-btn" data-val="24">24°C (Mild)</button>
@@ -154,9 +154,9 @@
                         <div class="control-card">
                             <div class="control-header">
                                 <span class="control-name">💧 Relative Humidity</span>
-                                <span class="control-value" id="humidityDisplay">92 %</span>
+                                <span class="control-value" id="humidityDisplay">65 %</span>
                             </div>
-                            <input type="range" id="humidityInput" min="20" max="100" step="1" value="92" class="live-slider">
+                            <input type="range" id="humidityInput" min="20" max="100" step="1" value="65" class="live-slider">
                             <div class="quick-ticks">
                                 <button type="button" class="tick-btn" data-val="40">40% (Dry)</button>
                                 <button type="button" class="tick-btn" data-val="65">65% (Normal)</button>
@@ -169,13 +169,13 @@
                         <div class="control-card vpd-span-card">
                             <div class="control-header">
                                 <span class="control-name">🍃 Vapour Pressure Deficit (VPD)</span>
-                                <span class="control-value vpd-highlight" id="vpdDisplay">0.28 kPa</span>
+                                <span class="control-value vpd-highlight" id="vpdDisplay">1.04 kPa</span>
                             </div>
                             <div class="vpd-bar-track">
-                                <div class="vpd-bar-fill" id="vpdBar" style="width: 20%;"></div>
+                                <div class="vpd-bar-fill" id="vpdBar" style="width: 65%;"></div>
                             </div>
-                            <span class="control-note" id="vpdNote">Atmospheric moisture conditions: High Fungal & Bacterial Spore Risk</span>
-                            <input type="range" id="precipInput" min="0" max="50" step="0.5" value="18.5" hidden>
+                            <span class="control-note" id="vpdNote" style="color: #10b981;">Atmospheric moisture conditions: Normal / Optimal Foliar Growth</span>
+                            <input type="range" id="precipInput" min="0" max="50" step="0.5" value="1.5" hidden>
                         </div>
                     </div>
                 </div>
@@ -214,7 +214,7 @@
                     <div class="hero-text-side">
                         <div class="badge-row">
                             <span class="pill-badge category-pill" id="resCategory">Fungal Disease</span>
-                            <span class="pill-badge risk-pill" id="resRiskLevel">High Weather Risk</span>
+                            <span class="pill-badge" id="resRiskLevel" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;">Low Risk</span>
                         </div>
                         <h2 class="disease-title" id="resDiseaseName">Early Blight</h2>
                         <p class="sci-name" id="resScientificName">Alternaria solani</p>
@@ -242,9 +242,9 @@
                                 <button type="button" class="btn-mode-tab" id="modeOriginalBtn">📷 Original Leaf Only</button>
                             </div>
                             <div class="heatmap-legend">
-                                <span class="legend-item"><span class="legend-dot red"></span> 🔴 Diseased Part (Hot Red)</span>
-                                <span class="legend-item"><span class="legend-dot green"></span> 🟢 Un-diseased Part (Foliage Green)</span>
-                                <span class="legend-item"><span class="legend-dot dark"></span> ⬛ Non-Leaf Background</span>
+                                <span class="legend-item"><span class="legend-dot red"></span> 🔴 Diseased Part (Pure Red)</span>
+                                <span class="legend-item"><span class="legend-dot green"></span> 🟢 Un-diseased Leaf (Pure Green)</span>
+                                <span class="legend-item"><span class="legend-dot dark"></span> ⬛ Waste Background (Ignored)</span>
                             </div>
                         </div>
                     </div>
@@ -337,8 +337,8 @@
                         </div>
                         <div class="microclimate-metric-box">
                             <div class="metric-box-label">Outbreak Risk</div>
-                            <div class="metric-box-val" id="resRiskBadge" style="color: #ef4444;">High Alert</div>
-                            <div class="metric-box-sub" id="resRiskScore">Score: 84%</div>
+                            <div class="metric-box-val" id="resRiskBadge" style="color: #10b981;">Low Risk</div>
+                            <div class="metric-box-sub" id="resRiskScore">Score: 10%</div>
                         </div>
                     </div>
                 </div>
@@ -551,7 +551,7 @@
                 <div><strong>VPD:</strong> <span id="docVpd">0.28 kPa</span></div>
                 <div><strong>Precipitation:</strong> <span id="docPrecip">4.2 mm</span></div>
                 <div><strong>Solar Radiation:</strong> <span id="docSolar">17.5 MJ</span></div>
-                <div><strong>Microclimate Alert:</strong> <span id="docRisk">High Outbreak Risk</span></div>
+                <div><strong>Microclimate Alert:</strong> <span id="docRisk">Low Risk</span></div>
             </div>
 
             <!-- Report Sections -->

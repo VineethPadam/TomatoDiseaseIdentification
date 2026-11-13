@@ -32,6 +32,10 @@ public class AgEra5RiskService {
     }
 
     public RiskEvaluation evaluateRisk(String diseaseKey, WeatherIndicators weather) {
+        return evaluateRisk(diseaseKey, weather, 0.0);
+    }
+
+    public RiskEvaluation evaluateRisk(String diseaseKey, WeatherIndicators weather, Double foliarPct) {
         WeatherIndicators w = ensureWeatherDefaults(weather);
         double temp = w.getTemperature();
         double rh = w.getHumidity();
@@ -103,13 +107,13 @@ public class AgEra5RiskService {
                 factors.add("Absence of heavy rain allows airborne whitefly vectors to disperse without impediment.");
             }
         } else if ("Tomato___healthy".equals(diseaseKey)) {
+            score = 10.0;
             if (temp >= 20.0 && temp <= 26.0 && rh >= 55.0 && rh <= 75.0 && vpd >= 0.8 && vpd <= 1.4) {
-                score = 92.0;
-                factors.add(String.format("AgERA5 indicators (Temp: %.1f°C, RH: %.1f%%, VPD: %.2f kPa) fall directly inside the tomato vegetative comfort zone.", temp, rh, vpd));
+                factors.add(String.format("Optimal vegetative microclimate (Temp: %.1f°C, RH: %.1f%%, VPD: %.2f kPa) supports vigorous, disease-free tomato foliage.", temp, rh, vpd));
             } else {
-                score = 70.0;
-                factors.add("Environmental parameters present minor physiological stress but remain within manageable bounds.");
+                factors.add("Foliage is healthy. Microclimate requires routine monitoring but presents minimal pathogen risk.");
             }
+            return new RiskEvaluation("Low Risk / Optimal Health", score, factors);
         } else {
             if (rh >= 80.0) {
                 score += 30.0;
@@ -121,13 +125,36 @@ public class AgEra5RiskService {
             }
         }
 
-        score = Math.min(99.0, Math.max(10.0, score));
+        // Realistic Plant-Grounding: Blend physical foliar infection severity (60%) with microclimate score (40%)
+        double foliar = foliarPct != null ? Math.max(0.0, foliarPct) : 0.0;
+        double fSeverity;
+        String fReason;
+        if (foliar >= 50.0) {
+            fSeverity = 75.0 + Math.min(25.0, (foliar - 50.0) * 0.5);
+            fReason = String.format("Critical foliar destruction: %.1f%% of leaf surface is consumed by active pathological lesions.", foliar);
+        } else if (foliar >= 20.0) {
+            fSeverity = 50.0 + (foliar - 20.0) * 0.83;
+            fReason = String.format("Substantial foliar spread: %.1f%% of clear leaf area exhibits active disease symptoms.", foliar);
+        } else if (foliar > 0.0) {
+            fSeverity = 30.0 + foliar * 1.0;
+            fReason = String.format("Early localized foliar damage: %.1f%% symptomatic leaf lesion area detected.", foliar);
+        } else {
+            fSeverity = score;
+            fReason = null;
+        }
+
+        double finalScore = (foliar > 0.0) ? (0.60 * fSeverity + 0.40 * score) : score;
+        finalScore = Math.min(99.0, Math.max(10.0, Math.round(finalScore * 10.0) / 10.0));
+
+        if (fReason != null) {
+            factors.add(0, fReason);
+        }
 
         String level;
-        if (score >= 75.0) {
-            level = "High Risk / Outbreak Conditions";
-        } else if (score >= 50.0) {
-            level = "Moderate Alert";
+        if (finalScore >= 70.0) {
+            level = "High Risk / Critical Outbreak";
+        } else if (finalScore >= 45.0) {
+            level = "Moderate Alert / Active Spread";
         } else {
             level = "Low Microclimatic Stress";
         }
@@ -136,7 +163,7 @@ public class AgEra5RiskService {
             factors.add("Meteorological indicators are within typical baseline agricultural ranges.");
         }
 
-        return new RiskEvaluation(level, score, factors);
+        return new RiskEvaluation(level, finalScore, factors);
     }
 
     public static class RiskEvaluation {

@@ -74,6 +74,9 @@ public class DiagnosisRecord {
     @Column(name = "analytics_chart_image", columnDefinition = "LONGTEXT")
     private String analyticsChartImage;
 
+    @Column(name = "foliar_infection_pct")
+    private Double foliarInfectionPct;
+
     @Column(name = "pathology_focus_label", length = 200)
     private String pathologyFocusLabel;
 
@@ -156,6 +159,9 @@ public class DiagnosisRecord {
 
     public String getAnalyticsChartImage() { return analyticsChartImage; }
     public void setAnalyticsChartImage(String analyticsChartImage) { this.analyticsChartImage = analyticsChartImage; }
+
+    public Double getFoliarInfectionPct() { return foliarInfectionPct; }
+    public void setFoliarInfectionPct(Double foliarInfectionPct) { this.foliarInfectionPct = foliarInfectionPct; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

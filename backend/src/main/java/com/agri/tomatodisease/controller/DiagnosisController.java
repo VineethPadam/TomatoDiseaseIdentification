@@ -103,6 +103,7 @@ public class DiagnosisController {
             String heatmapImage = (String) mlResult.get("heatmap_image");
             String pathologyFocusLabel = (String) mlResult.getOrDefault("pathology_focus_label", "Active Pathological Lesion Focus");
             String analyticsChartImage = (String) mlResult.get("analytics_chart_image");
+            Double foliarPct = mlResult.get("foliar_infection_pct") != null ? Double.valueOf(String.valueOf(mlResult.get("foliar_infection_pct"))) : 0.0;
 
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> top3 = (List<Map<String, Object>>) mlResult.get("top3");
@@ -116,8 +117,8 @@ public class DiagnosisController {
                 commonName = diseaseEntity.getCommonName();
             }
 
-            // 5. Evaluate AgERA5 Microclimatic Risk
-            AgEra5RiskService.RiskEvaluation riskEval = riskService.evaluateRisk(predictedKey, weather);
+            // 5. Evaluate AgERA5 Microclimatic Risk directly integrated with real leaf foliar infection
+            AgEra5RiskService.RiskEvaluation riskEval = riskService.evaluateRisk(predictedKey, weather, foliarPct);
 
             // 6. Generate Comprehensive Spring AI Report
             SpringAiReportService.ReportResult aiReport = springAiService.generateComprehensiveReport(
@@ -126,7 +127,8 @@ public class DiagnosisController {
                     confidence,
                     diseaseEntity,
                     weather,
-                    riskEval
+                    riskEval,
+                    foliarPct
             );
 
             // 7. Persist Diagnosis Record to MySQL
@@ -155,6 +157,7 @@ public class DiagnosisController {
             record.setHeatmapImage(heatmapImage);
             record.setPathologyFocusLabel(pathologyFocusLabel);
             record.setAnalyticsChartImage(analyticsChartImage);
+            record.setFoliarInfectionPct(foliarPct);
             record.setCreatedAt(LocalDateTime.now());
 
             DiagnosisRecord saved = recordRepository.save(record);
@@ -167,6 +170,7 @@ public class DiagnosisController {
             response.setHeatmapImage(saved.getHeatmapImage());
             response.setPathologyFocusLabel(saved.getPathologyFocusLabel());
             response.setAnalyticsChartImage(saved.getAnalyticsChartImage());
+            response.setFoliarInfectionPct(saved.getFoliarInfectionPct());
             response.setPredictedDisease(saved.getPredictedDisease());
             response.setDiseaseKey(saved.getDiseaseKey());
             response.setScientificName(saved.getScientificName());

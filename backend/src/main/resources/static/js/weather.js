@@ -102,6 +102,10 @@ const AgERA5 = {
                     const preset = this.presets[pKey];
                     tempSlider.value = preset.temperature;
                     humSlider.value = preset.humidity;
+                    const precipInput = document.getElementById("precipInput");
+                    if (precipInput && preset.precipitation !== undefined) {
+                        precipInput.value = preset.precipitation;
+                    }
                     updateWeatherDisplay();
                 }
             });
@@ -135,13 +139,15 @@ const AgERA5 = {
     getCurrentValues() {
         const temp = parseFloat(document.getElementById("tempInput").value);
         const hum = parseFloat(document.getElementById("humidityInput").value);
+        const precipInput = document.getElementById("precipInput");
+        const precip = precipInput ? parseFloat(precipInput.value) : 1.5;
         const vpd = this.calculateVpd(temp, hum);
         return {
             temperature: temp,
             humidity: hum,
-            precipitation: 12.0,
-            solarRadiation: 16.0,
-            windSpeed: 2.5,
+            precipitation: precip,
+            solarRadiation: 18.0,
+            windSpeed: 2.0,
             vpd: vpd
         };
     }

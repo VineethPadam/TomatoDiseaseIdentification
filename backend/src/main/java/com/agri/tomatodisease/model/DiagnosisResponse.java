@@ -33,6 +33,7 @@ public class DiagnosisResponse {
     private String heatmapImage;
     private String pathologyFocusLabel;
     private String analyticsChartImage;
+    private Double foliarInfectionPct;
 
     private LocalDateTime createdAt;
 
@@ -106,6 +107,9 @@ public class DiagnosisResponse {
 
     public String getAnalyticsChartImage() { return analyticsChartImage; }
     public void setAnalyticsChartImage(String analyticsChartImage) { this.analyticsChartImage = analyticsChartImage; }
+
+    public Double getFoliarInfectionPct() { return foliarInfectionPct; }
+    public void setFoliarInfectionPct(Double foliarInfectionPct) { this.foliarInfectionPct = foliarInfectionPct; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

@@ -139,7 +139,12 @@ def generate_diagnostic_analytics_chart(
         )
 
     # Risk badge box inside panel 2
-    risk_color = "#ef4444" if ("High" in risk_level or "Severe" in risk_level or risk_score > 70) else ("#f59e0b" if "Mod" in risk_level else "#10b981")
+    if "Low" in risk_level or "Optimal" in risk_level or risk_score < 40.0:
+        risk_color = "#10b981"
+    elif "Mod" in risk_level or risk_score < 70.0:
+        risk_color = "#f59e0b"
+    else:
+        risk_color = "#ef4444"
     ax1.text(
         0.5, 0.90,
         f"Microclimate Alert: {risk_level} ({risk_score:.0f}%)",

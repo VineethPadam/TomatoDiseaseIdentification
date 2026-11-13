@@ -272,7 +272,24 @@ const App = {
 
     renderDiagnosisReport(data) {
         document.getElementById("resCategory").textContent = data.category || "Phytopathology";
-        document.getElementById("resRiskLevel").textContent = data.microclimateRiskLevel || "High Weather Risk";
+        const riskLevelEl = document.getElementById("resRiskLevel");
+        const rLevel = data.microclimateRiskLevel || "Low Risk";
+        if (riskLevelEl) {
+            riskLevelEl.textContent = rLevel;
+            if (rLevel.includes("Low") || rLevel.includes("Optimal")) {
+                riskLevelEl.style.backgroundColor = "#ecfdf5";
+                riskLevelEl.style.color = "#059669";
+                riskLevelEl.style.border = "1px solid #a7f3d0";
+            } else if (rLevel.includes("Mod")) {
+                riskLevelEl.style.backgroundColor = "#fffbeb";
+                riskLevelEl.style.color = "#d97706";
+                riskLevelEl.style.border = "1px solid #fde68a";
+            } else {
+                riskLevelEl.style.backgroundColor = "#fef2f2";
+                riskLevelEl.style.color = "#b91c1c";
+                riskLevelEl.style.border = "1px solid #fecaca";
+            }
+        }
         document.getElementById("resDiseaseName").textContent = data.predictedDisease;
         document.getElementById("resScientificName").textContent = data.scientificName || "Solanum lycopersicum";
 
@@ -280,9 +297,10 @@ const App = {
         const conf = data.confidenceScore ? parseFloat(data.confidenceScore).toFixed(1) : "98.2";
         document.getElementById("confidenceValue").textContent = `${conf}%`;
 
-        // Pathology Focus Labels
+        // Pathology Focus Labels & Foliar Infection Percentage
+        const foliarText = data.foliarInfectionPct !== undefined && data.foliarInfectionPct !== null ? ` • Foliar Infection: ${parseFloat(data.foliarInfectionPct).toFixed(1)}%` : "";
         const camTitle = `${data.predictedDisease} Grad-CAM`;
-        const camFocus = `[${data.pathologyFocusLabel || "Water-soaked lesion margins"}]`;
+        const camFocus = `[${data.pathologyFocusLabel || "Pathological lesion focus"}]${foliarText}`;
         const resCamTitleEl = document.getElementById("resCamTitle");
         const resCamFocusEl = document.getElementById("resCamFocus");
         if (resCamTitleEl) resCamTitleEl.textContent = camTitle;
@@ -422,7 +440,7 @@ const App = {
             const docSolarEl = document.getElementById("docSolar");
             const sValDoc = w.solarRadiation !== undefined ? w.solarRadiation : (w.solar_radiation !== undefined ? w.solar_radiation : 18.0);
             if (docSolarEl) docSolarEl.textContent = `${parseFloat(sValDoc).toFixed(1)} MJ`;
-            document.getElementById("docRisk").textContent = d.microclimateRiskLevel || "High Risk";
+            document.getElementById("docRisk").textContent = d.microclimateRiskLevel || "Low Risk";
 
             // Content
             document.getElementById("docSymptomsText").textContent = d.symptomsReport || "";
@@ -465,7 +483,7 @@ const App = {
             const textContent = `====================================================================
 AGROVISION AI — OFFICIAL TOMATO LEAF DIAGNOSTIC REPORT
 Model: LeafVision-DINO (ViT-S/16) | Accuracy: ${parseFloat(d.confidenceScore || 98.2).toFixed(1)}%
-Indicators: Copernicus AgERA5 v2.0 | Microclimate Risk: ${d.microclimateRiskLevel || "High Outbreak Risk"}
+Indicators: Copernicus AgERA5 v2.0 | Microclimate Risk: ${d.microclimateRiskLevel || "Low Risk"}
 ====================================================================
 
 DIAGNOSED CONDITION: ${d.predictedDisease} (${d.scientificName || "N/A"})
